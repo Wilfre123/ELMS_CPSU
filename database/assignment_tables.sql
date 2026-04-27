@@ -1,0 +1,63 @@
+CREATE TABLE IF NOT EXISTS `assignments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `section_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `instructions` text DEFAULT NULL,
+  `due_date` datetime DEFAULT NULL,
+  `allow_late` tinyint(1) NOT NULL DEFAULT 0,
+  `late_penalty` decimal(5,2) NOT NULL DEFAULT 0.00,
+  `max_late_days` int(11) NOT NULL DEFAULT 0,
+  `max_score` decimal(8,2) NOT NULL DEFAULT 100.00,
+  `passing_score` decimal(5,2) NOT NULL DEFAULT 60.00,
+  `max_submissions` int(11) NOT NULL DEFAULT 1,
+  `allowed_file_types` varchar(500) NOT NULL DEFAULT 'pdf,doc,docx,txt,zip,py,java,cpp,c,js',
+  `max_file_size` int(11) NOT NULL DEFAULT 52428800,
+  `is_published` tinyint(1) NOT NULL DEFAULT 0,
+  `created_by` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `section_id` (`section_id`),
+  CONSTRAINT `assignments_section_fk` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `assignment_submissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `assignment_id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `attempt_number` int(11) NOT NULL DEFAULT 1,
+  `submitted_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `is_late` tinyint(1) NOT NULL DEFAULT 0,
+  `minutes_late` int(11) NOT NULL DEFAULT 0,
+  `status` enum('submitted','graded','returned') NOT NULL DEFAULT 'submitted',
+  `score` decimal(8,2) DEFAULT NULL,
+  `late_penalty_applied` decimal(5,2) NOT NULL DEFAULT 0.00,
+  `final_score` decimal(8,2) DEFAULT NULL,
+  `feedback` text DEFAULT NULL,
+  `graded_by` int(11) DEFAULT NULL,
+  `graded_at` timestamp NULL DEFAULT NULL,
+  `plagiarism_hash` varchar(64) DEFAULT NULL,
+  `plagiarism_flag` tinyint(1) NOT NULL DEFAULT 0,
+  `plagiarism_similarity` decimal(5,2) NOT NULL DEFAULT 0.00,
+  `plagiarism_matched_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `assignment_id` (`assignment_id`),
+  KEY `student_id` (`student_id`),
+  CONSTRAINT `asub_assignment_fk` FOREIGN KEY (`assignment_id`) REFERENCES `assignments` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `asub_student_fk` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `submission_files` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `submission_id` int(11) NOT NULL,
+  `original_filename` varchar(255) NOT NULL,
+  `stored_filename` varchar(255) NOT NULL,
+  `file_path` varchar(500) NOT NULL,
+  `file_size` int(11) NOT NULL,
+  `file_type` varchar(50) DEFAULT NULL,
+  `file_hash` varchar(64) DEFAULT NULL,
+  `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `submission_id` (`submission_id`),
+  CONSTRAINT `sfile_submission_fk` FOREIGN KEY (`submission_id`) REFERENCES `assignment_submissions` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

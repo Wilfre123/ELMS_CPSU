@@ -1,0 +1,7 @@
+# Prevent direct execution of uploaded files
+Options -ExecCGI
+AddHandler cgi-script .php .php3 .php4 .php5 .phtml .pl .py .jsp .asp .htm .shtml .sh .cgi
+<FilesMatch "\.(php|php3|php4|php5|phtml|pl|py|jsp|asp|htm|shtml|sh|cgi)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
